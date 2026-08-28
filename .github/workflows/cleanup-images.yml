@@ -41,7 +41,7 @@ jobs:
     steps:
       - uses: dataaxiom/ghcr-cleanup-action@v1
         with:
-          delete-tags: '^sha-*'
+          delete-tags: '^sha-[0-9a-f]+$'
           exclude-tags: '^(latest|v?[0-9]+(\.[0-9]+)*)$'
           use-regex: true
           older-than: 30 days
