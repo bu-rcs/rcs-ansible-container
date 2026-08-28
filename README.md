@@ -88,7 +88,7 @@ image still builds; it does not mean anything was published.
 
 ### Retention and cleanup
 
-Handled by `.github/workflows/cleanup-images.yaml`.
+Handled by `.github/workflows/cleanup-images.yml`.
 
 - **On pull request close** — that PR's `pr-<N>` tag is deleted.
 - **Weekly (Mondays)** — images whose only tag is `sha-*` and which are older
