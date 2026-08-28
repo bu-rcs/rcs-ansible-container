@@ -1,0 +1,41 @@
+name: Cleanup images
+
+on:
+  pull_request:
+    types: [closed]
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Report only, delete nothing'
+        type: boolean
+        default: true
+
+concurrency:
+  group: cleanup-images
+
+jobs:
+  pr-tag:
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          delete-tags: pr-${{ github.event.pull_request.number }}
+
+  untagged:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          delete-untagged: true
+          exclude-tags: latest,main
+          dry-run: ${{ inputs.dry-run || false }}
