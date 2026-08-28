@@ -1,0 +1,7 @@
+ansible==12.2.0
+ansible-lint==25.11.0
+dnspython==2.8.0
+omsdk==1.2.518
+boto3==1.41.3
+pytz==2025.2
+pynetbox==7.6.0

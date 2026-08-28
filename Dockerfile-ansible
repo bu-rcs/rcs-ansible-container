@@ -1,0 +1,43 @@
+FROM python:3.12-slim-trixie AS builder
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      build-essential \
+      libffi-dev \
+      git && \
+    apt-get clean -y
+
+RUN mkdir -p /srv/ansible
+
+COPY requirements.txt /srv/ansible/requirements.txt
+
+COPY galaxy-requirements.yml /srv/ansible/galaxy-requirements.yml
+
+RUN python3 -m venv /srv/ansible/env && \
+  /srv/ansible/env/bin/pip install -r /srv/ansible/requirements.txt
+
+# Final Image
+FROM python:3.12-slim-trixie
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ssh \
+      git \
+      vim \
+      less \
+    && apt-get clean -y
+
+COPY --from=builder /srv/ansible /srv/ansible
+
+RUN /srv/ansible/env/bin/ansible-galaxy install -r \
+  /srv/ansible/galaxy-requirements.yml
+
+# disable mouse so cut and paste works
+RUN echo "set mouse=" > /root/.vimrc
+
+RUN echo 'source /srv/ansible/env/bin/activate' > /etc/profile.d/venv.sh \
+ && echo 'source /srv/ansible/env/bin/activate' >> /etc/bash.bashrc
+
+ENTRYPOINT []
+
+CMD ["/srv/ansible/env/bin/ansible-playboook"]
