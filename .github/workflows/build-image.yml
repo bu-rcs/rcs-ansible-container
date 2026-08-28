@@ -42,12 +42,13 @@ jobs:
           flavor: |
             latest=auto
           tags: |
-            type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha,enable=${{ github.event_name != 'pull_request' }}
 
+      # Publishes only for version tags and same-repo PRs.
+      # main pushes and branch dispatches build for validation, then stop.
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
@@ -55,8 +56,9 @@ jobs:
           file: ./Dockerfile-ansible
           platforms: linux/amd64
           push: >-
-            ${{ github.event_name != 'pull_request'
-                || github.event.pull_request.head.repo.full_name == github.repository }}
+            ${{ startsWith(github.ref, 'refs/tags/v')
+                || (github.event_name == 'pull_request'
+                    && github.event.pull_request.head.repo.full_name == github.repository) }}
           provenance: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
